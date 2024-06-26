@@ -1,5 +1,5 @@
 PATH
-  remote: .
+  remote: ..
   specs:
     appraisal-matrix (0.1.0)
       appraisal (~> 2.2)
@@ -7,7 +7,7 @@ PATH
 GEM
   remote: https://rubygems.org/
   specs:
-    appraisal (2.5.0)
+    appraisal (2.2.0)
       bundler
       rake
       thor (>= 0.14.0)
@@ -32,7 +32,7 @@ GEM
     rainbow (3.1.1)
     rake (13.2.1)
     regexp_parser (2.9.2)
-    rexml (3.3.0)
+    rexml (3.3.1)
       strscan
     rspec (3.13.0)
       rspec-core (~> 3.13.0)
@@ -70,6 +70,7 @@ PLATFORMS
   x86_64-darwin-23
 
 DEPENDENCIES
+  appraisal (~> 2.2.0)
   appraisal-matrix!
   pry
   pry-byebug
