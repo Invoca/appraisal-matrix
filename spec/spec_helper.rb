@@ -1,6 +1,9 @@
 # frozen_string_literal: true
 
+require 'appraisal'
 require "appraisal/matrix"
+require 'pry'
+require 'pry-byebug'
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure
