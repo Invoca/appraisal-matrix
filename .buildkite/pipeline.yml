@@ -1,8 +1,0 @@
----
-steps:
-- label: ":ruby: Render Test Matrix"
-  timeout_in_minutes: 5
-  plugins:
-  - ssh://git@github.com/Invoca/invoca-ruby-test-matrix-buildkite-plugin.git#main:
-      min_ruby_version: '3.0'
-      slack_notification_channel: '#dev-team-release-backend-tools-octothorpe'
