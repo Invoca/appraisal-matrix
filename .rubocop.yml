@@ -1,13 +1,8 @@
+# This rubocop config file inherits from our centralized style-guide repository.
+# If you are looking to update the ruby style guide, be sure to both update the rubocop config
+# as well as the README.md
+# https://github.com/Invoca/style-guide/tree/master/ruby
+inherit_from: https://raw.githubusercontent.com/Invoca/style-guide/master/ruby/.rubocop.yml
+
 AllCops:
-  TargetRubyVersion: 2.6
-
-Style/StringLiterals:
-  Enabled: true
-  EnforcedStyle: double_quotes
-
-Style/StringLiteralsInInterpolation:
-  Enabled: true
-  EnforcedStyle: double_quotes
-
-Layout/LineLength:
-  Max: 120
+  TargetRubyVersion: 3.1
