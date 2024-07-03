@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    appraisal-matrix (0.1.0)
+    appraisal-matrix (0.2.0)
       appraisal (~> 2.2)
 
 GEM

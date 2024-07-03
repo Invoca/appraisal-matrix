@@ -65,18 +65,25 @@ appraisal_matrix(activesupport: "6.1", sidekiq: "7.0")
 
 In addition to specifying the minimum requested version, users will be able to make additional version requests.
 
-#### Maximum version (Coming soon!)
+#### Maximum version
 
-Include a maximum boundary (inclusive).
+Include a maximum boundary (exclusive).
 ```ruby
 appraisal_matrix(activesupport: { min: "6.1", max: "7.1" })
 ```
 
-#### Version step (Coming soon!)
+#### Version step
+
+The default operation is to test against each minor version. You can choose to be more or less inclusive when necessary.
 
 Only test the latest release of each major version.
 ```ruby
-appraisal_matrix(activesupport: { min: "6.1", max: "7.1", step: :major })
+appraisal_matrix(activesupport: { min: "6.1", max: "8.0", step: :major })
+```
+
+Or include all patch releases
+```ruby
+appraisal_matrix(activesupport: { min: "6.1", max: "7.1", step: :patch })
 ```
 
 ## Development

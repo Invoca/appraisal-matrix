@@ -5,7 +5,26 @@ require 'appraisal/matrix/rubygems_helper'
 
 module Appraisal::Matrix
   module AppraiseFileWithMatrix
-    include RubygemsHelper
+
+    class VersionArray
+      include RubygemsHelper
+
+      SUPPORTED_VERSION_STEPS = [:major, :minor, :patch].freeze
+
+      attr_reader :minimum_version, :maximum_version, :step
+
+      def initialize(min:, max: nil, step: :minor)
+        SUPPORTED_VERSION_STEPS.include?(step) or raise("Unsupported version step: #{step}")
+
+        @minimum_version = Gem::Version.new(min)
+        @maximum_version = max ? Gem::Version.new(max) : nil
+        @step = step.to_sym
+      end
+
+      def for_gem(gem_name)
+        versions_to_test(gem_name, minimum_version, maximum_version, step)
+      end
+    end
 
     # appraisal_matrix(rails: "6.0")
     # appraisal_matrix(rails: "6.0", sidekiq: "5")
@@ -21,14 +40,15 @@ module Appraisal::Matrix
       #   [[a, x], [a, y], [a, z]]
       # ]
       names_and_versions_to_test =
-        kwargs.map do |gem_name, version_request|
-          if version_request.is_a?(Hash)
-            raise "TODO: Version request options not implemented yet"
-          else
-            minimum_version = Gem::Version.new(version_request)
-          end
+        kwargs.map do |gem_name, version_options|
+          version_array =
+            if version_options.is_a?(Hash)
+              VersionArray.new(**version_options)
+            else
+              VersionArray.new(min: version_options)
+            end
 
-          versions_to_test(gem_name, minimum_version).map do |version|
+          version_array.for_gem(gem_name).map do |version|
             [gem_name, version]
           end
         end
