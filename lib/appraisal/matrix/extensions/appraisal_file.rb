@@ -9,25 +9,24 @@ module Appraisal::Matrix
     class VersionArray
       SUPPORTED_VERSION_STEPS = [:major, :minor, :patch].freeze
 
-      attr_reader :gem_name, :minimum_version, :maximum_version, :step
+      attr_reader :gem_name, :version_restrictions, :step
 
-      def initialize(gem_name:, min:, max: nil, step: :minor)
+      def initialize(gem_name:, versions:, step: :minor)
         SUPPORTED_VERSION_STEPS.include?(step) or raise("Unsupported version step: #{step}")
 
         @gem_name = gem_name
-        @minimum_version = Gem::Version.new(min)
-        @maximum_version = max ? Gem::Version.new(max) : nil
+        @version_restrictions = versions.map { |version| Gem::Dependency.new('', version) }
         @step = step.to_sym
       end
 
       def versions
-        RubygemsHelper.versions_to_test(gem_name, minimum_version, maximum_version, step)
+        RubygemsHelper.versions_to_test(gem_name, version_restrictions, step)
       end
     end
 
     # appraisal_matrix(rails: "6.0")
-    # appraisal_matrix(rails: "6.0", sidekiq: "5")
-    # appraisal_matrix(rails: "6.0", sidekiq: { min: “5.0”, max: “6.0”, step: :major })
+    # appraisal_matrix(rails: [">= 6.0", "< 7.1"])
+    # appraisal_matrix(rails: { versions: [">= 6.0", "< 7.1"], step: "major" })
     # appraisal_matrix(rails: "6.0") do
     #   gem "sqlite3", "~> 2.5"
     # end
@@ -41,10 +40,13 @@ module Appraisal::Matrix
       names_and_versions_to_test =
         kwargs.map do |gem_name, version_options|
           version_array =
-            if version_options.is_a?(Hash)
+            case version_options
+            when String
+              VersionArray.new(gem_name:, versions: [">= #{version_options}"])
+            when Array
+              VersionArray.new(gem_name:, versions: version_options)
+            when Hash
               VersionArray.new(gem_name:, **version_options)
-            else
-              VersionArray.new(gem_name:, min: version_options)
             end
 
           version_array.versions.map do |version|

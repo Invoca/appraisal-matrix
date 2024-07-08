@@ -9,24 +9,36 @@ RSpec.describe Appraisal::Matrix::AppraiseFileWithMatrix do
     subject { appraisal_matrix(**desired_gems) }
 
     context "with a maximum version specified" do
-      let(:desired_gems) { { rails: { min: "6.1", max: "7.1" } } }
-
       before do
-        expect(Appraisal::Matrix::RubygemsHelper).to receive(:versions_to_test).with(:rails, Gem::Version.new("6.1"), Gem::Version.new("7.1"), :minor).and_return(["6.1", "7.0"])
+        expect(Appraisal::Matrix::RubygemsHelper).to receive(:versions_to_test).with(:rails, [Gem::Dependency.new("", ">= 6.1"), Gem::Dependency.new("", "< 7.1")], :minor).and_return(["6.1", "7.0"])
       end
 
-      it "creates a matrix of appraisals" do
-        expect(self).to receive(:appraise).with("rails-6_1").and_yield { |block_scope| expect(block_scope).to receive(:gem).with(:rails, "~> 6.1.0") }
-        expect(self).to receive(:appraise).with("rails-7_0").and_yield { |block_scope| expect(block_scope).to receive(:gem).with(:rails, "~> 7.0.0") }
-        subject
+      context "using the keyword argument syntax" do
+        let(:desired_gems) { { rails: { versions: [">= 6.1", "< 7.1"] } } }
+
+        it "creates a matrix of appraisals" do
+          expect(self).to receive(:appraise).with("rails-6_1").and_yield { |block_scope| expect(block_scope).to receive(:gem).with(:rails, "~> 6.1.0") }
+          expect(self).to receive(:appraise).with("rails-7_0").and_yield { |block_scope| expect(block_scope).to receive(:gem).with(:rails, "~> 7.0.0") }
+          subject
+        end
+      end
+
+      context "using the array argument syntax" do
+        let (:desired_gems) { { rails: [">= 6.1", "< 7.1"] } }
+
+        it "creates a matrix of appraisals" do
+          expect(self).to receive(:appraise).with("rails-6_1").and_yield { |block_scope| expect(block_scope).to receive(:gem).with(:rails, "~> 6.1.0") }
+          expect(self).to receive(:appraise).with("rails-7_0").and_yield { |block_scope| expect(block_scope).to receive(:gem).with(:rails, "~> 7.0.0") }
+          subject
+        end
       end
     end
 
     context "requesting major version steps" do
-      let(:desired_gems) { { rails: { min: "6.1", step: :major } } }
+      let(:desired_gems) { { rails: { versions: [">= 6.1"], step: :major } } }
 
       before do
-        expect(Appraisal::Matrix::RubygemsHelper).to receive(:versions_to_test).with(:rails, Gem::Version.new("6.1"), nil, :major).and_return(["6", "7"])
+        expect(Appraisal::Matrix::RubygemsHelper).to receive(:versions_to_test).with(:rails, [Gem::Dependency.new("", ">= 6.1")], :major).and_return(["6", "7"])
       end
 
       it "creates a matrix of appraisals" do
@@ -37,10 +49,10 @@ RSpec.describe Appraisal::Matrix::AppraiseFileWithMatrix do
     end
 
     context "requesting patch version steps" do
-      let(:desired_gems) { { rails: { min: "6.1", step: :patch } } }
+      let(:desired_gems) { { rails: { versions: [">= 6.1"], step: :patch } } }
 
       before do
-        expect(Appraisal::Matrix::RubygemsHelper).to receive(:versions_to_test).with(:rails, Gem::Version.new("6.1"), nil, :patch).and_return(["6.1.0", "6.1.1", "7.0.0", "7.1.0"])
+        expect(Appraisal::Matrix::RubygemsHelper).to receive(:versions_to_test).with(:rails, [Gem::Dependency.new("", ">= 6.1")], :patch).and_return(["6.1.0", "6.1.1", "7.0.0", "7.1.0"])
       end
 
       it "creates a matrix of appraisals" do
@@ -53,7 +65,7 @@ RSpec.describe Appraisal::Matrix::AppraiseFileWithMatrix do
     end
 
     context "requesting a step that is not supported" do
-      let(:desired_gems) { { rails: { min: "6.1", step: :pizza } } }
+      let(:desired_gems) { { rails: { versions: [">= 6.1"], step: :pizza } } }
 
       it "raises an error" do
         expect { subject }.to raise_error("Unsupported version step: pizza")
@@ -64,7 +76,7 @@ RSpec.describe Appraisal::Matrix::AppraiseFileWithMatrix do
       let(:desired_gems) { { rails: "6.1" } }
 
       before do
-        expect(Appraisal::Matrix::RubygemsHelper).to receive(:versions_to_test).with(:rails, Gem::Version.new("6.1"), nil, :minor).and_return(["6.1", "7.0", "7.1"])
+        expect(Appraisal::Matrix::RubygemsHelper).to receive(:versions_to_test).with(:rails, [Gem::Dependency.new("", ">= 6.1")], :minor).and_return(["6.1", "7.0", "7.1"])
       end
 
       it "creates a matrix of appraisals including the specified minimum version" do
@@ -98,8 +110,8 @@ RSpec.describe Appraisal::Matrix::AppraiseFileWithMatrix do
       let(:desired_gems) { { rails: "6.1", sidekiq: "5" } }
 
       before do
-        expect(Appraisal::Matrix::RubygemsHelper).to receive(:versions_to_test).with(:rails, Gem::Version.new("6.1"), nil, :minor).and_return(["6.1", "7.0", "7.1"])
-        expect(Appraisal::Matrix::RubygemsHelper).to receive(:versions_to_test).with(:sidekiq, Gem::Version.new("5"), nil, :minor).and_return(["5.0", "6.0"])
+        expect(Appraisal::Matrix::RubygemsHelper).to receive(:versions_to_test).with(:rails, [Gem::Dependency.new("", ">= 6.1")], :minor).and_return(["6.1", "7.0", "7.1"])
+        expect(Appraisal::Matrix::RubygemsHelper).to receive(:versions_to_test).with(:sidekiq, [Gem::Dependency.new("", ">= 5")], :minor).and_return(["5.0", "6.0"])
       end
 
       it "creates a matrix of appraisals including the specified minimum version" do
