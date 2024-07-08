@@ -42,11 +42,11 @@ module Appraisal::Matrix
           version_array =
             case version_options
             when String
-              VersionArray.new(gem_name:, versions: [">= #{version_options}"])
+              VersionArray.new(gem_name: gem_name, versions: [">= #{version_options}"])
             when Array
-              VersionArray.new(gem_name:, versions: version_options)
+              VersionArray.new(gem_name: gem_name, versions: version_options)
             when Hash
-              VersionArray.new(gem_name:, **version_options)
+              VersionArray.new(gem_name: gem_name, **version_options)
             end
 
           version_array.versions.map do |version|
