@@ -3,10 +3,8 @@
 require_relative "../../../lib/appraisal/matrix/rubygems_helper"
 
 RSpec.describe Appraisal::Matrix::RubygemsHelper do
-  include Appraisal::Matrix::RubygemsHelper
-
   describe "#versions_to_test" do
-    subject { versions_to_test(gem_name, minimum_version, maximum_version, step) }
+    subject { described_class.versions_to_test(gem_name, minimum_version, maximum_version, step) }
 
     let(:gem_name)        { "rails" }
     let(:minimum_version) { Gem::Version.new("6.0") }

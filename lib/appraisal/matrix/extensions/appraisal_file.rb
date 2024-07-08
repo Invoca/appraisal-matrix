@@ -7,8 +7,6 @@ module Appraisal::Matrix
   module AppraiseFileWithMatrix
 
     class VersionArray
-      include RubygemsHelper
-
       SUPPORTED_VERSION_STEPS = [:major, :minor, :patch].freeze
 
       attr_reader :gem_name, :minimum_version, :maximum_version, :step
@@ -23,7 +21,7 @@ module Appraisal::Matrix
       end
 
       def versions
-        versions_to_test(gem_name, minimum_version, maximum_version, step)
+        RubygemsHelper.versions_to_test(gem_name, minimum_version, maximum_version, step)
       end
     end
 
