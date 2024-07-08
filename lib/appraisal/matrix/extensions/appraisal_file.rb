@@ -11,17 +11,18 @@ module Appraisal::Matrix
 
       SUPPORTED_VERSION_STEPS = [:major, :minor, :patch].freeze
 
-      attr_reader :minimum_version, :maximum_version, :step
+      attr_reader :gem_name, :minimum_version, :maximum_version, :step
 
-      def initialize(min:, max: nil, step: :minor)
+      def initialize(gem_name:, min:, max: nil, step: :minor)
         SUPPORTED_VERSION_STEPS.include?(step) or raise("Unsupported version step: #{step}")
 
+        @gem_name = gem_name
         @minimum_version = Gem::Version.new(min)
         @maximum_version = max ? Gem::Version.new(max) : nil
         @step = step.to_sym
       end
 
-      def for_gem(gem_name)
+      def versions
         versions_to_test(gem_name, minimum_version, maximum_version, step)
       end
     end
@@ -43,12 +44,12 @@ module Appraisal::Matrix
         kwargs.map do |gem_name, version_options|
           version_array =
             if version_options.is_a?(Hash)
-              VersionArray.new(**version_options)
+              VersionArray.new(gem_name:, **version_options)
             else
-              VersionArray.new(min: version_options)
+              VersionArray.new(gem_name:, min: version_options)
             end
 
-          version_array.for_gem(gem_name).map do |version|
+          version_array.versions.map do |version|
             [gem_name, version]
           end
         end
