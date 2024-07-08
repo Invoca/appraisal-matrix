@@ -14,7 +14,7 @@ module Appraisal
         URI.parse("https://rubygems.org/api/v1/versions/#{gem_name}.json").open do |raw_version_data|
           JSON.parse(raw_version_data.read).each do |version_data|
             version = Gem::Version.new(version_data['number'])
-            versions_to_test << version_segments(version, step).join('.') if include_version?(version, minimum_version, maximum_version)
+            versions_to_test << version_for_step(version, step) if include_version?(version, minimum_version, maximum_version)
           end
         end
 
@@ -23,25 +23,19 @@ module Appraisal
 
       private
 
-      def version_segments(version, step)
-        case step
-        when :major
-          version.segments[0..0]
-        when :minor
-          version.segments[0..1]
-        when :patch
-          version.segments[0..2]
-        else
-          raise "Unsupported requested version step: #{step}"
-        end
+      SEGMENT_STEP_SIZES = {
+        major: 1,
+        minor: 2,
+        patch: 3
+      }.freeze
+
+      def version_for_step(version, step)
+        size_for_step = SEGMENT_STEP_SIZES[step] or raise ArgumentError, "unsupported requested version step: #{step}, expected #{SEGMENT_STEP_SIZES.keys}"
+        version.segments.first(size_for_step).join(".")
       end
 
       def include_version?(version, minimum_version, maximum_version)
-        if maximum_version
-          !version.prerelease? && version >= minimum_version && version < maximum_version
-        else
-          !version.prerelease? && version >= minimum_version
-        end
+        !version.prerelease? && version >= minimum_version && (!maximum_version || version < maximum_version)
       end
     end
   end

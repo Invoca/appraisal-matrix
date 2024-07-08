@@ -60,7 +60,7 @@ RSpec.describe Appraisal::Matrix::RubygemsHelper do
       let(:step) { :pizza }
 
       it "raises an error" do
-        expect { subject }.to raise_error("Unsupported requested version step: pizza")
+        expect { subject }.to raise_error("unsupported requested version step: pizza, expected [:major, :minor, :patch]")
       end
     end
   end
