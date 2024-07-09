@@ -10,11 +10,11 @@ module Appraisal
         # Returns a set of versions to test against for a given gem.
         #
         # @param gem_name [String, Symbol] The name of the gem.
-        # @param version_requirements [Gem::Requirement] The version requirements for the gem.
+        # @param version_requirement [Gem::Requirement] The version requirement for the gem.
         # @param step [Symbol] The step value.
         #
         # @return [Set] A set of versions to test against.
-        def versions_to_test(gem_name, version_requirements, step)
+        def versions_to_test(gem_name, version_requirement, step)
           # Generate a set to store the versions to test against 
           versions_to_test = Set.new
 
@@ -22,7 +22,7 @@ module Appraisal
           URI.parse("https://rubygems.org/api/v1/versions/#{gem_name}.json").open do |raw_version_data|
             JSON.parse(raw_version_data.read).each do |version_data|
               version = Gem::Version.new(version_data['number'])
-              versions_to_test << version_for_step(version, step) if include_version?(version, version_requirements)
+              versions_to_test << version_for_step(version, step) if include_version?(version, version_requirement)
             end
           end
 
@@ -42,8 +42,8 @@ module Appraisal
           version.segments.first(size_for_step).join(".")
         end
 
-        def include_version?(version, version_requirements)
-          !version.prerelease? && version_requirements.satisfied_by?(version)
+        def include_version?(version, version_requirement)
+          !version.prerelease? && version_requirement.satisfied_by?(version)
         end
       end
     end
