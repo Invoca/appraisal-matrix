@@ -4,10 +4,10 @@ require_relative "../../../lib/appraisal/matrix/rubygems_helper"
 
 RSpec.describe Appraisal::Matrix::RubygemsHelper do
   describe "#versions_to_test" do
-    subject { described_class.versions_to_test(gem_name, version_restrictions, step) }
+    subject { described_class.versions_to_test(gem_name, version_requirements, step) }
 
     let(:gem_name)             { "rails" }
-    let(:version_restrictions) { [Gem::Dependency.new('', '>= 6.0')] }
+    let(:version_requirements) { Gem::Requirement.new(['>= 6.0']) }
     let(:step)                 { :minor }
     
     let(:parsed_uri) { double("uri") }
@@ -36,7 +36,7 @@ RSpec.describe Appraisal::Matrix::RubygemsHelper do
     it { is_expected.to eq(Set.new(["6.0", "6.1", "7.0", "7.1"])) }
 
     context "when a maximum version is specified" do
-      let(:version_restrictions) { [Gem::Dependency.new('', '>= 6.0'), Gem::Dependency.new('', '< 7.0')] }
+      let(:version_requirements) { Gem::Requirement.new(['>= 6.0', '< 7.0']) }
 
       it { is_expected.to eq(Set.new(["6.0", "6.1"])) }
     end

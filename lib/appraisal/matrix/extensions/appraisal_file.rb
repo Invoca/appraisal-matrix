@@ -9,27 +9,30 @@ module Appraisal::Matrix
     class VersionArray
       SUPPORTED_VERSION_STEPS = [:major, :minor, :patch].freeze
 
-      attr_reader :gem_name, :version_restrictions, :step
+      attr_reader :gem_name, :version_requirements, :step
 
       def initialize(gem_name:, versions:, step: :minor)
         SUPPORTED_VERSION_STEPS.include?(step) or raise("Unsupported version step: #{step}")
 
         @gem_name = gem_name
-        @version_restrictions = versions.map { |version| Gem::Dependency.new('', version) }
+        @version_requirements = Gem::Requirement.new(versions)
         @step = step.to_sym
       end
 
       def versions
-        RubygemsHelper.versions_to_test(gem_name, version_restrictions, step)
+        RubygemsHelper.versions_to_test(gem_name, version_requirements, step)
       end
     end
 
-    # appraisal_matrix(rails: "6.0")
-    # appraisal_matrix(rails: [">= 6.0", "< 7.1"])
-    # appraisal_matrix(rails: { versions: [">= 6.0", "< 7.1"], step: "major" })
-    # appraisal_matrix(rails: "6.0") do
-    #   gem "sqlite3", "~> 2.5"
-    # end
+    # Define a matrix of appraisals to test against
+    # Expected usage:
+    #   appraisal_matrix(rails: "6.0")
+    #   appraisal_matrix(rails: "> 6.0.3")
+    #   appraisal_matrix(rails: [">= 6.0", "< 7.1"])
+    #   appraisal_matrix(rails: { versions: [">= 6.0", "< 7.1"], step: "major" })
+    #   appraisal_matrix(rails: "6.0") do
+    #     gem "sqlite3", "~> 2.5"
+    #   end
     def appraisal_matrix(**kwargs, &block)
       # names_and_versions_to_test
       # [
@@ -42,6 +45,9 @@ module Appraisal::Matrix
           version_array =
             case version_options
             when String
+              parsed_options = version_options.include?(" ") ? [version_options] : [">= #{version_options}"]
+              VersionArray.new(gem_name: gem_name, versions: parsed_options)
+            when Integer, Float
               VersionArray.new(gem_name: gem_name, versions: [">= #{version_options}"])
             when Array
               VersionArray.new(gem_name: gem_name, versions: version_options)
