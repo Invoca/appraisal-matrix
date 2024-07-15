@@ -53,6 +53,18 @@ appraisal_matrix(activesupport: "6.1") do
 end
 ```
 
+#### Block arguments
+If you would like to setup conditional logic based off of the versions of the gems in the matrix, you can pass a block with arguments to `appraisal_matrix`.
+
+```ruby
+appraisal_matrix(activesupport: "6.1") do |activesupport:, sidekiq:|
+  # activesupport <Gem::Version>
+  if activesupport < "7"
+    remove_gem 'test_after_commit'
+  end
+end
+```
+
 ### Appraising more than one Gem
 
 You can also pass more than one gem to `appraisal_matrix` to create a matrix of all combinations of the specified gems.
