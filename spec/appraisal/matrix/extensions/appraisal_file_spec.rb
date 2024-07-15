@@ -120,7 +120,7 @@ RSpec.describe Appraisal::Matrix::AppraiseFileWithMatrix do
         context "with a block with arguments" do
           subject(:run_matrix) do
             appraisal_matrix(**desired_gems) do |rails:|
-              if rails < "7"
+              if rails < Gem::Version.new("7")
                 gem "sqlite3", "< 2"
               else
                 gem "sqlite3", "~> 2.5"
@@ -206,7 +206,7 @@ RSpec.describe Appraisal::Matrix::AppraiseFileWithMatrix do
       context "with a block" do
         subject(:run_matrix) do
           appraisal_matrix(**desired_gems) do |rails:, sidekiq:|
-            if rails < "7" && sidekiq < "6"
+            if rails < Gem::Version.new("7") && sidekiq < Gem::Version.new("6")
               gem "sqlite3", "< 2"
             else
               gem "sqlite3", "~> 2.5"
