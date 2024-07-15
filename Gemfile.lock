@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    appraisal-matrix (0.3.0)
+    appraisal-matrix (0.3.0.pre.tstarck.1)
       appraisal (~> 2.2)
 
 GEM
