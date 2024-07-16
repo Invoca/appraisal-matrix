@@ -92,23 +92,57 @@ RSpec.describe Appraisal::Matrix::AppraiseFileWithMatrix do
         let(:desired_gems) { { rails: "6.1" } }
 
         it_behaves_like "a matrix of appraisals"
+      end
 
-        context "with a block to pass into each appraisal" do
-          it "yields the block to each appraisal" do
+      context "with a block to pass into each appraisal" do
+        subject(:run_matrix) do
+          appraisal_matrix(**desired_gems) { gem "sqlite3", "~> 2.5" }
+        end
+        let(:desired_gems) { { rails: "6.1" } }
+
+        it "yields the block to each appraisal" do
+          expect(self).to receive(:appraise).with("rails-6_1").and_yield do |block_scope|
+            expect(block_scope).to receive(:gem).with(:rails, "~> 6.1.0")
+            expect(block_scope).to receive(:gem).with("sqlite3", "~> 2.5")
+          end
+          expect(self).to receive(:appraise).with("rails-7_0").and_yield do |block_scope|
+            expect(block_scope).to receive(:gem).with(:rails, "~> 7.0.0")
+            expect(block_scope).to receive(:gem).with("sqlite3", "~> 2.5")
+          end
+          expect(self).to receive(:appraise).with("rails-7_1").and_yield do |block_scope|
+            expect(block_scope).to receive(:gem).with(:rails, "~> 7.1.0")
+            expect(block_scope).to receive(:gem).with("sqlite3", "~> 2.5")
+          end
+
+          run_matrix
+        end
+
+        context "with a block with arguments" do
+          subject(:run_matrix) do
+            appraisal_matrix(**desired_gems) do |rails:|
+              if rails < Gem::Version.new("7")
+                gem "sqlite3", "< 2"
+              else
+                gem "sqlite3", "~> 2.5"
+              end
+            end
+          end
+
+          it "yields the block with the versions to each appraisal" do
             expect(self).to receive(:appraise).with("rails-6_1").and_yield do |block_scope|
               expect(block_scope).to receive(:gem).with(:rails, "~> 6.1.0")
-              expect(block_scope).to receive(:gem).with("sqlite3", "~> 2.5")
+              expect(block_scope).to receive(:gem).with("sqlite3", "< 2")
             end
             expect(self).to receive(:appraise).with("rails-7_0").and_yield do |block_scope|
               expect(block_scope).to receive(:gem).with(:rails, "~> 7.0.0")
               expect(block_scope).to receive(:gem).with("sqlite3", "~> 2.5")
             end
-            expect(self).to receive(:appraise).with("rails-7_1").and_yield do |block_scope|
+            expect(self).to receive(:appraise).with("rails-7_1").and_yield do |block_scope, versions|
               expect(block_scope).to receive(:gem).with(:rails, "~> 7.1.0")
               expect(block_scope).to receive(:gem).with("sqlite3", "~> 2.5")
             end
 
-            appraisal_matrix(**desired_gems) { gem "sqlite3", "~> 2.5" }
+            run_matrix
           end
         end
       end
@@ -167,6 +201,52 @@ RSpec.describe Appraisal::Matrix::AppraiseFileWithMatrix do
           expect(block_scope).to receive(:gem).with(:sidekiq, "~> 6.0.0")
         end
         subject
+      end
+
+      context "with a block" do
+        subject(:run_matrix) do
+          appraisal_matrix(**desired_gems) do |rails:, sidekiq:|
+            if rails < Gem::Version.new("7") && sidekiq < Gem::Version.new("6")
+              gem "sqlite3", "< 2"
+            else
+              gem "sqlite3", "~> 2.5"
+            end
+          end
+        end
+
+        it "yields the block with the versions to each appraisal" do
+          expect(self).to receive(:appraise).with("rails-6_1-sidekiq-5_0").and_yield do |block_scope|
+            expect(block_scope).to receive(:gem).with(:rails, "~> 6.1.0")
+            expect(block_scope).to receive(:gem).with(:sidekiq, "~> 5.0.0")
+            expect(block_scope).to receive(:gem).with("sqlite3", "< 2")
+          end
+          expect(self).to receive(:appraise).with("rails-6_1-sidekiq-6_0").and_yield do |block_scope|
+            expect(block_scope).to receive(:gem).with(:rails, "~> 6.1.0")
+            expect(block_scope).to receive(:gem).with(:sidekiq, "~> 6.0.0")
+            expect(block_scope).to receive(:gem).with("sqlite3", "~> 2.5")
+          end
+          expect(self).to receive(:appraise).with("rails-7_0-sidekiq-5_0").and_yield do |block_scope|
+            expect(block_scope).to receive(:gem).with(:rails, "~> 7.0.0")
+            expect(block_scope).to receive(:gem).with(:sidekiq, "~> 5.0.0")
+            expect(block_scope).to receive(:gem).with("sqlite3", "~> 2.5")
+          end
+          expect(self).to receive(:appraise).with("rails-7_0-sidekiq-6_0").and_yield do |block_scope|
+            expect(block_scope).to receive(:gem).with(:rails, "~> 7.0.0")
+            expect(block_scope).to receive(:gem).with(:sidekiq, "~> 6.0.0")
+            expect(block_scope).to receive(:gem).with("sqlite3", "~> 2.5")
+          end
+          expect(self).to receive(:appraise).with("rails-7_1-sidekiq-5_0").and_yield do |block_scope|
+            expect(block_scope).to receive(:gem).with(:rails, "~> 7.1.0")
+            expect(block_scope).to receive(:gem).with(:sidekiq, "~> 5.0.0")
+            expect(block_scope).to receive(:gem).with("sqlite3", "~> 2.5")
+          end
+          expect(self).to receive(:appraise).with("rails-7_1-sidekiq-6_0").and_yield do |block_scope|
+            expect(block_scope).to receive(:gem).with(:rails, "~> 7.1.0")
+            expect(block_scope).to receive(:gem).with(:sidekiq, "~> 6.0.0")
+            expect(block_scope).to receive(:gem).with("sqlite3", "~> 2.5")
+          end
+          run_matrix
+        end
       end
     end
   end

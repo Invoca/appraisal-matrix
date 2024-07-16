@@ -33,6 +33,13 @@ module Appraisal::Matrix
     #   appraisal_matrix(rails: "6.0") do
     #     gem "sqlite3", "~> 2.5"
     #   end
+    #   appraisal_matrix(rails: "6.0", sidekiq: "5.0") do |rails:, sidekiq:|
+    #     if rails < "7"
+    #       # do something...
+    #     else
+    #       # do something else...
+    #     end
+    #   end
     def appraisal_matrix(**kwargs, &block)
       # names_and_versions_to_test
       # [
@@ -76,7 +83,10 @@ module Appraisal::Matrix
           appraisal_spec.each do |gem_name, version|
             gem gem_name, "~> #{version}.0"
           end
-          instance_eval(&block) if block
+          if block
+            block_args = appraisal_spec.to_h { |gem_name, version| [gem_name.to_sym, Gem::Version.new(version)] }
+            instance_exec(**block_args, &block)
+          end
         end
       end
     end
