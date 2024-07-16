@@ -57,7 +57,7 @@ end
 If you would like to setup conditional logic based off of the versions of the gems in the matrix, you can pass a block with arguments to `appraisal_matrix`.
 
 ```ruby
-appraisal_matrix(activesupport: "6.1") do |activesupport:, sidekiq:|
+appraisal_matrix(activesupport: "6.1") do |activesupport:|
   # activesupport <Gem::Version>
   if activesupport < "7"
     remove_gem 'test_after_commit'
