@@ -19,6 +19,8 @@ metadata:
   tags:
   - ruby
   - gem
+  - open-source
+  - public
   annotations:
     buildkite.com/project-slug: invoca/appraisal-matrix
     github.com/project-slug: invoca/appraisal-matrix
