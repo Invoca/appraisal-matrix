@@ -10,3 +10,5 @@ gem 'pry-byebug'
 gem "rake", "~> 13.0"
 gem "rspec", "~> 3.0"
 gem "rubocop", "~> 1.21"
+gem "simplecov", "~> 0.22"
+gem "simplecov-lcov", "~> 0.8"
